@@ -11,12 +11,64 @@
     <div class="container">
         <header>
             <h1>AI 종목 분석 리포트</h1>
+            <div class="controls">
+                <div class="language-selector">
+                    <button class="lang-btn active" data-lang="EN">English</button>
+                    <button class="lang-btn" data-lang="KO">한국어</button>
+                </div>
+                <div class="report-type-selector">
+                    <select id="report-type" class="report-type-select">
+                        <option value="complete">Complete Report</option>
+                        <option value="final_decision">Final Trade Decision</option>
+                        <option value="investment_plan">Investment Plan</option>
+                        <option value="market_report">Market Report</option>
+                        <option value="trader_plan">Trader Investment Plan</option>
+                    </select>
+                </div>
+                <div class="view-selector">
+                    <button class="view-btn active" data-view="list">List</button>
+                    <button class="view-btn" data-view="grid">Grid</button>
+                </div>
+            </div>
         </header>
         
         <main>
             <div id="loading" class="loading">로딩 중...</div>
             <div id="error" class="error" style="display: none;"></div>
-            <div id="reports" class="reports-grid"></div>
+            
+            <!-- 리스트 뷰 -->
+            <div id="list-view" class="reports-list">
+                <div class="list-header">
+                    <div class="list-cell">날짜</div>
+                    <div class="list-cell">종목</div>
+                    <div class="list-cell">의사결정</div>
+                    <div class="list-cell">타입</div>
+                    <div class="list-cell">상세보기</div>
+                </div>
+                <div id="reports-list" class="list-content"></div>
+            </div>
+
+            <!-- 그리드 뷰 -->
+            <div id="grid-view" class="reports-grid" style="display: none;"></div>
+
+            <!-- 상세 보기 모달 -->
+            <div id="report-modal" class="modal" style="display: none;">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 id="modal-title"></h2>
+                        <button class="close-btn">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="modal-metadata">
+                            <span id="modal-date"></span>
+                            <span id="modal-decision"></span>
+                            <span id="modal-type"></span>
+                            <span id="modal-locale"></span>
+                        </div>
+                        <div id="modal-content"></div>
+                    </div>
+                </div>
+            </div>
         </main>
     </div>
 

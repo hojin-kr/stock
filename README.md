@@ -3,7 +3,7 @@
 ## 🧭 개요
 
 AI Agent가 분석한 종목별 주식 리포트를 활용하여, 사용자가 웹을 통해 쉽게 리포트를 열람할 수 있는 서비스.  
-리포트는 날짜/종목명 형식으로 Markdown 파일로 저장되며, 이를 자동으로 수집, 정리하여 웹에서 보기 쉽게 제공.
+리포트는 날짜/종목명/의사결정/언어별로 Markdown 파일로 저장되며, 이를 자동으로 수집, 정리하여 웹에서 보기 쉽게 제공.
 
 ## 📁 시스템 구조
 
@@ -20,28 +20,47 @@ AI Agent가 분석한 종목별 주식 리포트를 활용하여, 사용자가 �
 └── reports
     └── 2025-06-14
         ├── BUY
-        │   └── TSLA
-        │       ├── 202031.md
-        │       ├── EN
-        │       │   └── 204214.md
-        │       └── KO
-        │           └── 204214.md
+        │   └── TSLA
+        │       ├── EN
+        │       │   ├── complete.md
+        │       │   ├── final_trade_decision.md
+        │       │   ├── investment_plan.md
+        │       │   ├── market_report.md
+        │       │   └── trader_investment_plan.md
+        │       └── KO
+        │           ├── complete.md
+        │           ├── final_trade_decision.md
+        │           ├── investment_plan.md
+        │           ├── market_report.md
+        │           └── trader_investment_plan.md
         ├── HOLD
-        │   └── NVDA
-        │       └── EN
-        │           └── 203653.md
+        │   └── NVDA
+        │       └── EN
+        │           ├── complete.md
+        │           ├── final_trade_decision.md
+        │           ├── investment_plan.md
+        │           ├── market_report.md
+        │           └── trader_investment_plan.md
         └── SELL
-            ├── NVDA
-            │   ├── EN
-            │   │   └── 205124.md
-            │   └── KO
-            │       └── 205124.md
+            └── NVDA
+                ├── EN
+                │   ├── complete.md
+                │   ├── final_trade_decision.md
+                │   ├── investment_plan.md
+                │   ├── market_report.md
+                │   └── trader_investment_plan.md
+                └── KO
+                    ├── complete.md
+                    ├── final_trade_decision.md
+                    ├── investment_plan.md
+                    ├── market_report.md
+                    └── trader_investment_plan.md
 ```
 
 ## ✅ 주요 기능 정의
 
 ### 1. 리포트 자동 탐색 및 불러오기 (백엔드)
-- 폴더 구조: 
+- 폴더 구조: `reports/YYYY-MM-DD/DECISION/종목명/LOCALE/타입.md`
 - 파일 내용 읽어와서 구조화된 JSON 배열로 반환
 - API: `GET /api/reports`
 - 반환 형태:
@@ -51,6 +70,8 @@ AI Agent가 분석한 종목별 주식 리포트를 활용하여, 사용자가 �
     "date": "2025-06-14",
     "name": "NVDA",
     "decision": "HOLD",
+    "locale": "EN",
+    "type": "complete",
     "content": "AI 분석 결과 내용..."
   }
 ]
@@ -59,9 +80,100 @@ AI Agent가 분석한 종목별 주식 리포트를 활용하여, 사용자가 �
 ### 2. 리포트 목록 페이지 (프론트엔드)
 - 순수 HTML/CSS/JavaScript로 구현
 - API 호출 후 데이터 받아 렌더링
+- 리스트/그리드 뷰 전환 가능
+- 언어 선택 (EN/KO)
+- 리포트 타입 선택
 - 카드 형태로 날짜, 종목명, 분석 요약 출력
 - 기본 리스트는 최신 날짜부터 정렬
 - 마크다운 렌더링 (marked.js 사용)
+
+## 📡 API 명세
+
+### 1. 리포트 조회 API
+
+#### 1.1 모든 리포트 조회
+```
+GET /api/reports
+```
+
+**쿼리 파라미터:**
+- `locale` (선택): 언어 선택 (EN/KO)
+  - 기본값: EN
+  - 예시: `?locale=KO`
+- `type` (선택): 리포트 타입
+  - 기본값: complete
+  - 가능한 값: complete, final_decision, investment_plan, market_report, trader_plan
+  - 예시: `?type=investment_plan`
+
+**응답 예시:**
+```json
+[
+  {
+    "date": "2025-06-14",
+    "name": "TSLA",
+    "decision": "BUY",
+    "locale": "EN",
+    "type": "complete",
+    "content": "마크다운 형식의 리포트 내용..."
+  }
+]
+```
+
+#### 1.2 날짜별 리포트 조회
+```
+GET /api/reports/date
+```
+
+**쿼리 파라미터:**
+- `date` (필수): 조회할 날짜 (YYYY-MM-DD 형식)
+  - 예시: `?date=2025-06-14`
+- `locale` (선택): 언어 선택 (EN/KO)
+  - 기본값: EN
+  - 예시: `?locale=KO`
+- `type` (선택): 리포트 타입
+  - 기본값: complete
+  - 예시: `?type=investment_plan`
+
+#### 1.3 투자 의사결정별 리포트 조회
+```
+GET /api/reports/decision
+```
+
+**쿼리 파라미터:**
+- `decision` (필수): 투자 의사결정 (BUY/HOLD/SELL)
+  - 예시: `?decision=BUY`
+- `locale` (선택): 언어 선택 (EN/KO)
+  - 기본값: EN
+  - 예시: `?locale=KO`
+- `type` (선택): 리포트 타입
+  - 기본값: complete
+  - 예시: `?type=investment_plan`
+
+### 2. 응답 필드 설명
+
+| 필드      | 타입     | 설명                    |
+|---------|--------|-----------------------|
+| date    | string | 리포트 작성일 (YYYY-MM-DD) |
+| name    | string | 종목명                  |
+| decision| string | 투자 의사결정 (BUY/HOLD/SELL) |
+| locale  | string | 언어 (EN/KO)           |
+| type    | string | 리포트 타입 (complete/final_decision/investment_plan/market_report/trader_plan) |
+| content | string | 마크다운 형식의 리포트 내용     |
+
+### 3. 에러 응답
+
+모든 API는 에러 발생 시 다음과 같은 형식으로 응답합니다:
+
+```json
+{
+  "error": "에러 메시지"
+}
+```
+
+**HTTP 상태 코드:**
+- 200: 성공
+- 400: 잘못된 요청 (필수 파라미터 누락 등)
+- 500: 서버 내부 오류
 
 ## 📌 요구사항 정의서
 
@@ -72,6 +184,8 @@ AI Agent가 분석한 종목별 주식 리포트를 활용하여, 사용자가 �
 | 필수 | 리포트 목록 API | `/api/reports` API를 통해 모든 분석 리포트 제공 |
 | 필수 | 날짜/종목 추출   | 파일 경로 및 이름에서 날짜와 종목명 자동 추출      |
 | 필수 | 리포트 보기 UI  | 프론트에서 모든 리포트 리스트를 보여줌           |
+| 필수 | 언어 선택      | EN/KO 언어 선택 기능 제공              |
+| 필수 | 리포트 타입 선택  | 다양한 리포트 타입 선택 기능 제공           |
 | 선택 | 마크다운 렌더링   | 텍스트를 HTML로 변환      |
 | 선택 | 날짜/종목명 필터링 | 검색 또는 드롭다운 필터 (확장 가능)           |
 
@@ -94,8 +208,8 @@ AI Agent가 분석한 종목별 주식 리포트를 활용하여, 사용자가 �
 
 * `/api/reports` 핸들러
   * `filepath.Walk` 사용해 `./reports` 하위 모든 `.md` 파일 탐색
-  * 경로 예: `reports/2025-06-14/NAVER.md`
-  * 파일명 → 종목명, 상위 폴더명 → 날짜
+  * 경로 예: `reports/2025-06-14/BUY/TSLA/EN/complete.md`
+  * 파일명 → 종목명, 상위 폴더명 → 날짜/의사결정/언어
   * `Report` 구조체로 변환 후 JSON 반환
 
 * 보안
@@ -109,6 +223,9 @@ AI Agent가 분석한 종목별 주식 리포트를 활용하여, 사용자가 �
 * 받은 데이터 리스트로 mapping
 * CSS로 UI 구성
 * marked.js로 마크다운 렌더링
+* 언어 선택 기능
+* 리포트 타입 선택 기능
+* 리스트/그리드 뷰 전환 기능
 
 ## ⏱️ 향후 확장 계획 (Roadmap)
 
@@ -134,112 +251,12 @@ AI Agent가 분석한 종목별 주식 리포트를 활용하여, 사용자가 �
 | 파일 누락 처리   | 존재하지 않는 경로    | 오류 없이 무시      |
 | UI 출력      | 다양한 종목 이름 표시  | 카드 형태로 정확히 출력 |
 | 리포트 수 증가   | 100건 이상 리포트   | UI 느려짐 없이 출력  |
+| 언어 전환      | EN/KO 전환     | 해당 언어 리포트만 표시  |
+| 타입 필터링     | 타입별 선택      | 선택한 타입 리포트만 표시  |
 
 ## 📎 참고
 
 * 마크다운 렌더링: [marked.js](https://marked.js.org/)
 * CSS 프레임워크: [Tailwind CSS](https://tailwindcss.com/)
 * Go `filepath.Walk` 성능 문제 발생 시: goroutine + 채널 구조로 개선 가능
-
-## 📡 API 명세
-
-### 1. 리포트 조회 API
-
-#### 1.1 모든 리포트 조회
-```
-GET /api/reports
-```
-
-**쿼리 파라미터:**
-- `locale` (선택): 언어 선택 (EN/KO)
-  - 기본값: EN
-  - 예시: `?locale=KO`
-
-**응답 예시:**
-```json
-[
-  {
-    "date": "2025-06-14",
-    "name": "TSLA",
-    "decision": "BUY",
-    "locale": "EN",
-    "content": "마크다운 형식의 리포트 내용..."
-  }
-]
-```
-
-#### 1.2 날짜별 리포트 조회
-```
-GET /api/reports/date
-```
-
-**쿼리 파라미터:**
-- `date` (필수): 조회할 날짜 (YYYY-MM-DD 형식)
-  - 예시: `?date=2025-06-14`
-- `locale` (선택): 언어 선택 (EN/KO)
-  - 기본값: EN
-  - 예시: `?locale=KO`
-
-**응답 예시:**
-```json
-[
-  {
-    "date": "2025-06-14",
-    "name": "TSLA",
-    "decision": "BUY",
-    "locale": "EN",
-    "content": "마크다운 형식의 리포트 내용..."
-  }
-]
-```
-
-#### 1.3 투자 의사결정별 리포트 조회
-```
-GET /api/reports/decision
-```
-
-**쿼리 파라미터:**
-- `decision` (필수): 투자 의사결정 (BUY/HOLD/SELL)
-  - 예시: `?decision=BUY`
-- `locale` (선택): 언어 선택 (EN/KO)
-  - 기본값: EN
-  - 예시: `?locale=KO`
-
-**응답 예시:**
-```json
-[
-  {
-    "date": "2025-06-14",
-    "name": "TSLA",
-    "decision": "BUY",
-    "locale": "EN",
-    "content": "마크다운 형식의 리포트 내용..."
-  }
-]
-```
-
-### 2. 응답 필드 설명
-
-| 필드      | 타입     | 설명                    |
-|---------|--------|-----------------------|
-| date    | string | 리포트 작성일 (YYYY-MM-DD) |
-| name    | string | 종목명                  |
-| decision| string | 투자 의사결정 (BUY/HOLD/SELL) |
-| locale  | string | 언어 (EN/KO)           |
-| content | string | 마크다운 형식의 리포트 내용     |
-
-### 3. 에러 응답
-
-모든 API는 에러 발생 시 다음과 같은 형식으로 응답합니다:
-
-```json
-{
-  "error": "에러 메시지"
-}
-```
-
-**HTTP 상태 코드:**
-- 200: 성공
-- 400: 잘못된 요청 (필수 파라미터 누락 등)
-- 500: 서버 내부 오류
 
